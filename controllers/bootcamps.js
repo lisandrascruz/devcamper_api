@@ -3,15 +3,27 @@ const Bootcamp = require('../models/Bootcamp')
 // description:   Get all bootcamps
 // route:         GET api/v1/bootcamps
 // access:        Public
-exports.getBootcamps = (req, res) => {
-	res.status(200).json({success: true, message: 'Show all bootcamps', data: {type: 'bootcamps'}});
+exports.getBootcamps = async (req, res) => {
+	try{
+		const bootcamps = await Bootcamp.find();
+		res.status(200).json({ success: true, count: bootcamps.length, data: bootcamps });
+	}catch (e) {
+		res.status(401).json({ success: false });
+	}
 };
 
 // description:   Get single bootcamp
 // route:         GET api/v1/bootcamps/:id
 // access:        Public
-exports.getBootcamp = (req, res) => {
-	res.status(200).json({success: true, message: `Show bootcamp ${req.params.id}`, data: {type: 'bootcamps'}});
+exports.getBootcamp = async (req, res) => {
+	try{
+		const bootcamp = await Bootcamp.findById(req.params.id);
+
+		if(!bootcamp) return res.status(400).json({ success: false });
+		res.status(200).json({success: true, data: bootcamp});
+	}catch (e) {
+		res.status(400).json({ success: false });
+	}
 };
 
 // description:   Create bootcamp
@@ -21,22 +33,39 @@ exports.createBootcamp = async (req, res) => {
 	try {
 		const bootcamp = await Bootcamp.create(req.body);
 
-		res.status(201).json({success: true, data: bootcamp});
+		res.status(200).json({success: true, data: bootcamp});
 	} catch (err) {
-		res.status(400).json({ success: false })
+		res.status(400).json({ success: false });
 	}
 };
 
 // description:   Update bootcamp
 // route:         PUT api/v1/bootcamps/:id
 // access:        Public
-exports.updateBootcamp = (req, res) => {
-	res.status(200).json({success: true, message: `Update bootcamp ${req.params.id}`});
+exports.updateBootcamp = async (req, res) => {
+	try {
+		const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
+			new: true,
+			runValidators: true
+		});
+
+		if (!bootcamp) return res.status(400).json({success: false});
+		res.status(200).json({success: true, data: bootcamp});
+	} catch (e) {
+		res.status(400).json({success: false});
+	}
 };
 
 // description:   Delete bootcamp
 // route:         DELETE api/v1/bootcamps/
 // access:        Public
-exports.deleteBootcamp = (req, res) => {
-	res.status(200).json({success: true, message: `Delete bootcamp ${req.params.id}`});
+exports.deleteBootcamp = async (req, res) => {
+	try {
+		const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+
+		if (!bootcamp) return res.status(400).json({success: false});
+		res.status(200).json({success: true, data: {}});
+	} catch (e) {
+		res.status(400).json({success: false});
+	}
 };
